@@ -1,0 +1,15 @@
+Algorithms to implement:
+A*
+Djikstras
+DFS
+BFS
+
+Things to consider:
+Fixed Window
+Buttons to change algorithms - change title when selecting algorithm (DEFAULT - A*)
+No diagonal pathfinding - may be considered in future commits
+
+8-23
+create grid in JFrame window
+tweaked mouse and keyboard button config for future algorithm config
+create node class
