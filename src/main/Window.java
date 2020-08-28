@@ -25,17 +25,31 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+@SuppressWarnings("serial")
 public class Window extends JPanel
 					implements ActionListener, MouseListener, MouseMotionListener, KeyListener {
 
 	private JFrame window;
 	private int size = 25; // length of one side of block
 	private char key;
+	private boolean hover;
+	private Node startNode;
+	private Node endNode;
+	private Node wall;
+	private MenuControl menu;
+	private Algorithm a;
 	
 	// Constructor
-	public Window(String title) {
+	public Window(String title, Algorithm a) {
 		
 		key = 0;
+		startNode = null;
+		endNode = null;
+		wall = null;
+		menu = new MenuControl(this);
+		hover = false;
+		this.a = a;
+		a.addWindow(this);
 		
 		// Add Listeners
 		addKeyListener(this);
@@ -58,6 +72,8 @@ public class Window extends JPanel
 		window.setLocationRelativeTo(null); // null makes it open in the center of the screen
 		window.setVisible(true);
 		
+		menu.addToWindow();
+		
 		this.revalidate();
 		this.repaint();
 		
@@ -78,7 +94,34 @@ public class Window extends JPanel
 			}
 		}
 		
-		g.setColor(Color.black);
+		// draw startNode 
+		if(startNode != null) {
+			g.setColor(Color.red.brighter());
+			g.fillRect(startNode.getCoord()[0], startNode.getCoord()[1], size, size);
+		}
+		
+		
+		// draw endNode 
+		if(endNode != null) {
+			g.setColor(Color.blue.brighter());
+			g.fillRect(endNode.getCoord()[0], endNode.getCoord()[1], size, size);
+		}
+		
+		// draw wall
+		
+		// manage color of panel when mouse is over panel
+		if(hover) {
+			g.setColor(new Color(154, 173, 173, 115));
+		}
+		else {
+			g.setColor(new Color(196, 207, 207, 115));
+		}
+		
+		// create control panel
+		g.fillRect((this.getWidth() / 2) - 151, this.getHeight()-100, 300, 90);
+		
+		menu.setPos();
+		
 		
 	}
 	
@@ -95,13 +138,18 @@ public class Window extends JPanel
 		// change algorithm to a*
 		if(key == KeyEvent.VK_1) {
 			window.dispose();
-			new Window("Pathfinding Visualizer (Algorithm: A*)");
+			new Window("Pathfinding Visualizer (Algorithm: A*)", new AStar(this, size));
 		}
 		
 		// change algorithm to djikstra
 		if(key == KeyEvent.VK_2) {
 			window.dispose();
-			new Window("Pathfinding Visualizer (Algorithm: Djikstra's Algorithm)");
+			//new Window("Pathfinding Visualizer (Algorithm: Djikstra's Algorithm)");
+		}
+		
+		// start the algorithm
+		if(key == KeyEvent.VK_SPACE) {
+			// TODO
 		}
 		
 	}
@@ -111,7 +159,58 @@ public class Window extends JPanel
 
 	// Create and Remove node using mouse and keyboard buttons
 	public void nodeControl(MouseEvent e) {
-		
+		// left click ( add to board )
+		if(SwingUtilities.isLeftMouseButton(e)) {
+			int xLeftover = e.getX() % size;
+			int yLeftover = e.getY() % size;
+			
+			// startNode
+			if(key == 'q') {
+				if(startNode == null) { // if it does not exist
+					startNode = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
+				}
+				else { // if it already exists set it to a different block
+					startNode.setCoord(e.getX() - xLeftover, e.getY() - yLeftover);
+				}
+				
+				// put it on to the screen
+				this.repaint();
+			}
+			
+			// endNode
+			if(key ==  'w') {
+				if(endNode == null) {
+					endNode = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
+				}
+				else {
+					endNode.setCoord(e.getX() - xLeftover, e.getY() - yLeftover);
+				}
+				
+				this.repaint();
+			}
+			
+			// wall
+			
+			
+		}
+		// right click ( remove from board )
+		if(SwingUtilities.isRightMouseButton(e)) {
+			int findX = e.getX() - (e.getX() % size);
+			int findY = e.getY() - (e.getY() % size);
+			
+			// startNode
+			if(startNode != null && (startNode.getCoord()[0] == findX && startNode.getCoord()[1] == findY)) {
+				startNode = null;
+				this.repaint();
+			}
+			
+			// endNode
+			if(endNode != null && (endNode.getCoord()[0] == findX && endNode.getCoord()[1] == findY)) {
+				endNode = null;
+				this.repaint();
+			}
+			
+		}
 	}
 
 	@Override
@@ -127,8 +226,23 @@ public class Window extends JPanel
 	
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		// Tracks Mouse Movement
+		// Tracks Mouse Movement: checks to see if mouse is at hovered button panel
 		
+		// check if within x bounds of menu panel
+		if(e.getX() > (this.getWidth() / 2) - 151 && e.getX() < this.getWidth() + 300) {
+			
+			// now within y bounds of menu panel
+			if(e.getY() > this.getHeight() - 100 && e.getY() < this.getHeight() - 10) {
+				hover = true;
+			}
+			else {
+				hover = false;
+			}	
+		}
+		else {
+			hover = false;
+		}
+		repaint();
 	}
 	
 	@Override
@@ -153,7 +267,7 @@ public class Window extends JPanel
 	public void keyTyped(KeyEvent e) {}
 
 	public static void main(String[] args) { 
-		new Window("Pathfinding Visualizer (Algorithm: A*)");
+		new Window("Pathfinding Visualizer (Algorithm: A*)", new AStar(25));
 		
 	}
 

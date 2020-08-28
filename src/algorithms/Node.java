@@ -25,6 +25,13 @@ public class Node {
 		return this.y;
 	}
 	
+	public int[] getCoord() {
+		int[] res = new int[2];
+		res[0] = this.x;
+		res[1] = this.y;
+		return res;
+	}
+	
 	public void setCoord(int x, int y) {
 		this.x = x;
 		this.y = y;

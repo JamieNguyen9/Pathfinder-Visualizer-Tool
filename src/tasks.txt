@@ -1,8 +1,6 @@
 Algorithms to implement:
 A*
 Djikstras
-DFS
-BFS
 
 Things to consider:
 Fixed Window
@@ -13,3 +11,15 @@ No diagonal pathfinding - may be considered in future commits
 create grid in JFrame window
 tweaked mouse and keyboard button config for future algorithm config
 create node class
+
+8-24
+add ability to place start and end node on grid
+
+8/27
+add menu panel to window
+add ability to change color when hovering over menu panel
+change Algorithm interface to abstract class (ensure same variables when extending)
+
+8/28
+add some components to menu panel
+tweak menu panel and components to be !opaque
