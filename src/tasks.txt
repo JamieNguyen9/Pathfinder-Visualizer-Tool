@@ -21,5 +21,16 @@ add ability to change color when hovering over menu panel
 change Algorithm interface to abstract class (ensure same variables when extending)
 
 8/28
-add some components to menu panel
+add small components to menu panel
 tweak menu panel and components to be !opaque
+
+9/6
+add ability to draw walls on display
+update speed number to match with jslider value
+add clear button to window that clears all existing nodes on window
+
+9.29
+fix jpanel not being focused
+fox walls to not include start and end nodes
+removed button mapping to change algorithms
+added combo box to select different algorithms

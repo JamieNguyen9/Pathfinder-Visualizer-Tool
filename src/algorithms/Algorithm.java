@@ -7,6 +7,7 @@ public abstract class Algorithm {
 
 	Node startNode;
 	Node endNode;
+	String name;
 	Window w;
 	int size;
 	
@@ -26,6 +27,10 @@ public abstract class Algorithm {
 	
 	public void addWindow(Window w) {
 		this.w = w;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 }

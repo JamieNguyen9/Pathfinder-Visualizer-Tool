@@ -1,6 +1,8 @@
 package main;
 
 import algorithms.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,10 +18,12 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
@@ -33,23 +37,28 @@ public class Window extends JPanel
 	private int size = 25; // length of one side of block
 	private char key;
 	private boolean hover;
+	private boolean isRun;
 	private Node startNode;
 	private Node endNode;
 	private Node wall;
 	private MenuControl menu;
 	private Algorithm a;
+	private ArrayList<Node> walls;
 	
 	// Constructor
-	public Window(String title, Algorithm a) {
+	public Window(String title) {
 		
 		key = 0;
 		startNode = null;
 		endNode = null;
 		wall = null;
+		isRun = true;
 		menu = new MenuControl(this);
 		hover = false;
-		this.a = a;
+		this.a = new AStar(null, size);
 		a.addWindow(this);
+		walls = new ArrayList<>();		
+		
 		
 		// Add Listeners
 		addKeyListener(this);
@@ -71,6 +80,7 @@ public class Window extends JPanel
 		window.pack();
 		window.setLocationRelativeTo(null); // null makes it open in the center of the screen
 		window.setVisible(true);
+		
 		
 		menu.addToWindow();
 		
@@ -108,10 +118,14 @@ public class Window extends JPanel
 		}
 		
 		// draw wall
+		g.setColor(Color.black);
+		for (Node n : walls) {
+			g.fillRect(n.getCoord()[0], n.getCoord()[1], size, size);
+		}
 		
 		// manage color of panel when mouse is over panel
 		if(hover) {
-			g.setColor(new Color(154, 173, 173, 115));
+			g.setColor(new Color(128, 128, 128, 200));
 		}
 		else {
 			g.setColor(new Color(196, 207, 207, 115));
@@ -119,8 +133,15 @@ public class Window extends JPanel
 		
 		// create control panel
 		g.fillRect((this.getWidth() / 2) - 151, this.getHeight()-100, 300, 90);
-		
 		menu.setPos();
+		
+		// update speed Text based on checkbox
+		if(menu.getCheckbox().isSelected()) {
+			menu.getSpeedNum().setText("N/A");
+		}
+		else {
+			menu.getSpeedNum().setText(Integer.toString(menu.getSlider().getValue()));
+		}
 		
 		
 	}
@@ -135,21 +156,17 @@ public class Window extends JPanel
 			System.exit(0);
 		}
 		
-		// change algorithm to a*
-		if(key == KeyEvent.VK_1) {
-			window.dispose();
-			new Window("Pathfinding Visualizer (Algorithm: A*)", new AStar(this, size));
-		}
-		
-		// change algorithm to djikstra
-		if(key == KeyEvent.VK_2) {
-			window.dispose();
-			//new Window("Pathfinding Visualizer (Algorithm: Djikstra's Algorithm)");
-		}
-		
 		// start the algorithm
 		if(key == KeyEvent.VK_SPACE) {
-			// TODO
+			if(isRun) {
+				menu.getRun().setText("Stop");
+				isRun = false;
+			}
+			else {
+				menu.getRun().setText("Run");
+				isRun = true;
+			}
+			repaint();
 		}
 		
 	}
@@ -178,7 +195,7 @@ public class Window extends JPanel
 			}
 			
 			// endNode
-			if(key ==  'w') {
+			else if(key ==  'w') {
 				if(endNode == null) {
 					endNode = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
 				}
@@ -190,7 +207,17 @@ public class Window extends JPanel
 			}
 			
 			// wall
-			
+			else {
+				int[] coords = {e.getX() - xLeftover, e.getY() - yLeftover};
+				
+				if((startNode == null || !Arrays.equals(coords, startNode.getCoord())) && 
+						(endNode == null || !Arrays.equals(coords, endNode.getCoord()))) {
+					
+					wall = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
+					walls.add(wall);
+					this.repaint();
+				}
+			}
 			
 		}
 		// right click ( remove from board )
@@ -208,6 +235,16 @@ public class Window extends JPanel
 			if(endNode != null && (endNode.getCoord()[0] == findX && endNode.getCoord()[1] == findY)) {
 				endNode = null;
 				this.repaint();
+			}
+			
+			// walls
+			for(int i = 0; i < walls.size(); i++) {
+				int[] coords = walls.get(i).getCoord();
+				if(coords[0] == findX && coords[1] == findY) {
+					walls.remove(i);
+					this.repaint();
+					break;
+				}
 			}
 			
 		}
@@ -229,7 +266,7 @@ public class Window extends JPanel
 		// Tracks Mouse Movement: checks to see if mouse is at hovered button panel
 		
 		// check if within x bounds of menu panel
-		if(e.getX() > (this.getWidth() / 2) - 151 && e.getX() < this.getWidth() + 300) {
+		if(e.getX() > (this.getWidth() / 2) - 151 && e.getX() < (this.getWidth()/2) + 150) {
 			
 			// now within y bounds of menu panel
 			if(e.getY() > this.getHeight() - 100 && e.getY() < this.getHeight() - 10) {
@@ -244,11 +281,42 @@ public class Window extends JPanel
 		}
 		repaint();
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+			
+		Object source = e.getSource();
+		if (source instanceof JComboBox) {
+			JComboBox<String> cb = (JComboBox)e.getSource();
+			String algo = (String)cb.getSelectedItem();
+			if(algo.equals("A* Search")) {
+				a = new AStar(this, size);
+				window.setTitle("Pathfinding Visualizer (Algorithm: A* Search)");
+			}
+			if(algo.equals("Dijkstra's Algorithm")) {
+				a = new Dijkstra(this, size);
+				window.setTitle("Pathfinding Visualizer (Algorithm: Dijkstra's Algorithm)");
+			}
+		}
+		else if(source instanceof JButton) {
+			String command = e.getActionCommand();
+			if(command.equals("Clear")) {
+				startNode = null;
+				endNode = null;
+				walls = new ArrayList<>();
+			}
+			
+			if(command.equals("Run")) {
+				menu.getRun().setText("Stop");
+				isRun = false;
+			}
+			if(command.equals("Stop")){
+				menu.getRun().setText("Run");
+				isRun = true;
+					
+			}
+		}
+		repaint();
 	}
 
 	@Override
@@ -265,9 +333,10 @@ public class Window extends JPanel
 
 	@Override
 	public void keyTyped(KeyEvent e) {}
+	
 
 	public static void main(String[] args) { 
-		new Window("Pathfinding Visualizer (Algorithm: A*)", new AStar(25));
+		new Window("Pathfinding Visualizer (Algorithm: A* Search)");
 		
 	}
 
