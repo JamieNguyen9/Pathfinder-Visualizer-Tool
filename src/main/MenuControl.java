@@ -66,7 +66,6 @@ public class MenuControl {
 		runStop.setOpaque(true);
 		runStop.setVisible(true);
 		runStop.setFocusPainted(false);
-		runStop.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
 		runStop.setFont(new Font("SansSerif", Font.BOLD, 13));
 		runStop.setFocusable(false);
 		runStop.addActionListener(window);
@@ -113,13 +112,13 @@ public class MenuControl {
 		miniW[1] = window.getHeight() - 100;
 		
 		// set bounds on components - need exact dimensions and placements
-		speedText.setBounds(miniW[0] + 10, miniW[1] + 50, 75, 20);
+		speedText.setBounds(miniW[0] + 10, miniW[1] + 52, 75, 20);
 		slider.setBounds(miniW[0] + 5, miniW[1] + 70, 75, 20);
-		speedNum.setBounds(miniW[0] + 65, miniW[1] + 50, 30, 20);
-		showStep.setBounds(miniW[0] + 95, miniW[1] + 50, 125, 20);
+		speedNum.setBounds(miniW[0] + 63, miniW[1] + 52, 30, 20);
+		showStep.setBounds(miniW[0] + 6, miniW[1] + 33, 125, 20);
 		runStop.setBounds(miniW[0] + 217, miniW[1] + 7, 75, 20);
-		clear.setBounds(miniW[0] + 217, miniW[1] + 35, 75, 20);
-		algoList.setBounds(miniW[0] + 10, miniW[1] + 5, 200, 25);
+		clear.setBounds(miniW[0] + 217, miniW[1] + 33, 75, 20);
+		algoList.setBounds(miniW[0] + 10, miniW[1] + 7, 200, 25);
 	}
 	
 	public JCheckBox getCheckbox() {
@@ -137,5 +136,6 @@ public class MenuControl {
 	public JButton getRun() {
 		return runStop;
 	}
+	
 	
 }

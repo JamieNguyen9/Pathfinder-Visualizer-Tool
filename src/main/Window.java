@@ -44,6 +44,7 @@ public class Window extends JPanel
 	private MenuControl menu;
 	private Algorithm a;
 	private ArrayList<Node> walls;
+	private boolean showSteps;
 	
 	// Constructor
 	public Window(String title) {
@@ -58,7 +59,7 @@ public class Window extends JPanel
 		this.a = new AStar(null, size);
 		a.addWindow(this);
 		walls = new ArrayList<>();		
-		
+		showSteps = menu.getCheckbox().isSelected();
 		
 		// Add Listeners
 		addKeyListener(this);
@@ -80,9 +81,9 @@ public class Window extends JPanel
 		window.pack();
 		window.setLocationRelativeTo(null); // null makes it open in the center of the screen
 		window.setVisible(true);
-		
-		
 		menu.addToWindow();
+		
+		
 		
 		this.revalidate();
 		this.repaint();
@@ -123,6 +124,34 @@ public class Window extends JPanel
 			g.fillRect(n.getCoord()[0], n.getCoord()[1], size, size);
 		}
 		
+		if(a.isFound()) {
+			// draw frontier
+			for(int i = 0; i < a.getExplored().size(); i++) {
+				int[] tempCoords = a.getExplored().get(i).getCoord();
+				
+				g.setColor(Color.ORANGE);
+				g.fillRect(tempCoords[0], tempCoords[1], size, size);
+			}
+			
+			// draw path
+			for(int i = 0; i < a.getPath().size(); i++) {
+				int[] tempCoords = a.getPath().get(i).getCoord();
+				
+				g.setColor(Color.PINK);
+				g.fillRect(tempCoords[0], tempCoords[1], size, size);
+			}
+		}
+		
+		if(a.isFail()) {
+			// draw frontier
+			for(int i = 0; i < a.getExplored().size(); i++) {
+				int[] tempCoords = a.getExplored().get(i).getCoord();
+				
+				g.setColor(Color.ORANGE);
+				g.fillRect(tempCoords[0], tempCoords[1], size, size);
+			}
+		}
+		
 		// manage color of panel when mouse is over panel
 		if(hover) {
 			g.setColor(new Color(128, 128, 128, 200));
@@ -138,9 +167,11 @@ public class Window extends JPanel
 		// update speed Text based on checkbox
 		if(menu.getCheckbox().isSelected()) {
 			menu.getSpeedNum().setText("N/A");
+			showSteps = true;
 		}
 		else {
 			menu.getSpeedNum().setText(Integer.toString(menu.getSlider().getValue()));
+			showSteps = false;
 		}
 		
 		
@@ -161,6 +192,7 @@ public class Window extends JPanel
 			if(isRun) {
 				menu.getRun().setText("Stop");
 				isRun = false;
+				begin();
 			}
 			else {
 				menu.getRun().setText("Run");
@@ -212,10 +244,20 @@ public class Window extends JPanel
 				
 				if((startNode == null || !Arrays.equals(coords, startNode.getCoord())) && 
 						(endNode == null || !Arrays.equals(coords, endNode.getCoord()))) {
-					
 					wall = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
-					walls.add(wall);
-					this.repaint();
+
+					boolean temp = false;
+					for(Node n : walls) {
+						if(n.equals(wall)) {
+							temp = true;
+							break;
+						}
+					}
+					
+					if(!temp) {
+						walls.add(wall);
+						repaint();
+					}
 				}
 			}
 			
@@ -304,11 +346,13 @@ public class Window extends JPanel
 				startNode = null;
 				endNode = null;
 				walls = new ArrayList<>();
+				a.setup();
 			}
 			
 			if(command.equals("Run")) {
 				menu.getRun().setText("Stop");
 				isRun = false;
+				begin();
 			}
 			if(command.equals("Stop")){
 				menu.getRun().setText("Run");
@@ -317,6 +361,21 @@ public class Window extends JPanel
 			}
 		}
 		repaint();
+	}
+	
+	// Begins path finding algorithm
+	public void begin() {
+		if(startNode != null && endNode != null) {
+			if(showSteps) {
+				// set up and add time
+			}
+			else {
+				a.start(startNode, endNode, walls);
+			}
+		}
+		else {
+			System.out.println("Error: You need to put start and end points to run.");
+		}
 	}
 
 	@Override
@@ -333,7 +392,6 @@ public class Window extends JPanel
 
 	@Override
 	public void keyTyped(KeyEvent e) {}
-	
 
 	public static void main(String[] args) { 
 		new Window("Pathfinding Visualizer (Algorithm: A* Search)");

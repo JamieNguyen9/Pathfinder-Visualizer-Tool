@@ -1,5 +1,7 @@
 package algorithms;
 
+import java.util.ArrayList;
+
 /*
  * Object prepresenting blocks in the grid. This includes start and end node,
  * walls and open spaces. Allows the node to store calculations and position data.
@@ -9,11 +11,13 @@ public class Node {
 	
 	private int x, y;
 	private Node parent;
+	private int value;
 	
 	// Constructor
 	public Node(int x, int y) {
 		this.x = x;
 		this.y = y;
+		value = 10000;
 	}
 	
 	// Accessors and Mutators
@@ -45,7 +49,24 @@ public class Node {
 		this.parent = p;
 	}
 	
-	public static boolean isEqual(Node n1, Node n2) {
-		return ( n1.getX() == n2.getX() ) && ( n1.getY() == n2.getY() );
+	public int getValue() {
+		return this.value;
 	}
+	
+	public void setValue(int n) {
+		this.value = n;
+	}
+	
+	public boolean equals(Node n) {
+		return ( this.getX() == n.getX() ) && ( this.getY() == n.getY() );
+	}
+	
+	public String toString() {
+		ArrayList<Integer> res = new ArrayList<>();
+		res.add(this.x);
+		res.add(this.y);
+		return res.toString();
+	}
+
 }
+

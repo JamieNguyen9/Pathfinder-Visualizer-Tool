@@ -34,3 +34,7 @@ fix jpanel not being focused
 fox walls to not include start and end nodes
 removed button mapping to change algorithms
 added combo box to select different algorithms
+
+10/1
+implement a* search
+created more methods in algorithms.java
