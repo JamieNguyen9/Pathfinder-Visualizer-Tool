@@ -12,12 +12,14 @@ public class Node {
 	private int x, y;
 	private Node parent;
 	private int value;
+	private int g;
 	
 	// Constructor
 	public Node(int x, int y) {
 		this.x = x;
 		this.y = y;
 		value = 10000;
+		g = 0;
 	}
 	
 	// Accessors and Mutators
@@ -51,6 +53,14 @@ public class Node {
 	
 	public int getValue() {
 		return this.value;
+	}
+	
+	public int getG() {
+		return this.g;
+	}
+	
+	public void setG(int g) {
+		this.g = g;
 	}
 	
 	public void setValue(int n) {

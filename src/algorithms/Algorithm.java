@@ -58,13 +58,22 @@ public abstract class Algorithm {
 		return new ArrayList<>(this.explored);
 	}
 	
+	public ArrayList<Node> getFrontier() {
+		return new ArrayList<>(this.frontier);
+	}
+	
 	public boolean isFound() {
 		return isFound;
 	}
 	
-	public void setup() {
-		fail = false;
+	public void reset() {
+		startNode = null;
+		endNode = null;
+		frontier = new PriorityQueue<>();
+		explored = new HashSet<>();
+		path = new ArrayList<>();
 		isFound = false;
+		fail = false;
 	}
 	
 	public boolean isFail() {
@@ -99,10 +108,10 @@ public abstract class Algorithm {
 		if(coords[1] - 25 >= 0) {
 			res.add(new Node(coords[0], coords[1] - 25));
 		}
-		if(coords[0] + 25 <= w.getWidth()) {
+		if(coords[0] + 25 < w.getWidth()) {
 			res.add(new Node(coords[0] + 25, coords[1]));
 		}
-		if(coords[1] + 25 <= w.getHeight()) {
+		if(coords[1] + 25 < w.getHeight()) {
 			res.add(new Node(coords[0], coords[1] + 25));
 		}
 		

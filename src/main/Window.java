@@ -84,7 +84,6 @@ public class Window extends JPanel
 		menu.addToWindow();
 		
 		
-		
 		this.revalidate();
 		this.repaint();
 		
@@ -94,15 +93,49 @@ public class Window extends JPanel
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		// create grid
 		int height = this.getHeight();
 		int width = this.getWidth();
 		
-		g.setColor(Color.white.darker());
-		for(int i = 0; i < height; i+= size) {
-			for(int j = 0; j < width; j += size) {
-				g.drawRect(j, i, size, size);
+		if(a.isFound()) {
+			// draw explored
+			for(int i = 0; i < a.getExplored().size(); i++) {
+				int[] tempCoords = a.getExplored().get(i).getCoord();
+				
+				g.setColor(Color.pink);
+				g.fillRect(tempCoords[0], tempCoords[1], size, size);
 			}
+			
+			// draw frontier
+			for(int i = 0; i < a.getFrontier().size(); i++) {
+				int[] tempCoords = a.getFrontier().get(i).getCoord();
+				
+				g.setColor(Color.cyan);
+				g.fillRect(tempCoords[0], tempCoords[1], size, size);
+			}
+			
+			// draw solution path
+			for(int i = 0; i < a.getPath().size(); i++) {
+				int[] tempCoords = a.getPath().get(i).getCoord();
+				
+				g.setColor(Color.green);
+				g.fillRect(tempCoords[0], tempCoords[1], size, size);
+			}
+			
+			menu.getRun().setText("Run");
+			isRun = true;
+		}
+		
+		if(a.isFail()) {
+			// draw explored
+			for(int i = 0; i < a.getExplored().size(); i++) {
+				int[] tempCoords = a.getExplored().get(i).getCoord();
+				
+				g.setColor(Color.green.brighter());
+				g.fillRect(tempCoords[0], tempCoords[1], size, size);
+			}
+			
+			menu.getRun().setText("Run");
+			isRun = true;
 		}
 		
 		// draw startNode 
@@ -111,7 +144,6 @@ public class Window extends JPanel
 			g.fillRect(startNode.getCoord()[0], startNode.getCoord()[1], size, size);
 		}
 		
-		
 		// draw endNode 
 		if(endNode != null) {
 			g.setColor(Color.blue.brighter());
@@ -119,42 +151,22 @@ public class Window extends JPanel
 		}
 		
 		// draw wall
-		g.setColor(Color.black);
 		for (Node n : walls) {
+			g.setColor(Color.black);
 			g.fillRect(n.getCoord()[0], n.getCoord()[1], size, size);
 		}
 		
-		if(a.isFound()) {
-			// draw frontier
-			for(int i = 0; i < a.getExplored().size(); i++) {
-				int[] tempCoords = a.getExplored().get(i).getCoord();
-				
-				g.setColor(Color.ORANGE);
-				g.fillRect(tempCoords[0], tempCoords[1], size, size);
-			}
-			
-			// draw path
-			for(int i = 0; i < a.getPath().size(); i++) {
-				int[] tempCoords = a.getPath().get(i).getCoord();
-				
-				g.setColor(Color.PINK);
-				g.fillRect(tempCoords[0], tempCoords[1], size, size);
-			}
-		}
-		
-		if(a.isFail()) {
-			// draw frontier
-			for(int i = 0; i < a.getExplored().size(); i++) {
-				int[] tempCoords = a.getExplored().get(i).getCoord();
-				
-				g.setColor(Color.ORANGE);
-				g.fillRect(tempCoords[0], tempCoords[1], size, size);
+		// draw grid
+		g.setColor(Color.white.darker());
+		for(int i = 0; i < height; i+= size) {
+			for(int j = 0; j < width; j += size) {
+				g.drawRect(j, i, size, size);
 			}
 		}
 		
 		// manage color of panel when mouse is over panel
 		if(hover) {
-			g.setColor(new Color(128, 128, 128, 200));
+			g.setColor(new Color(128, 128, 128, 230));
 		}
 		else {
 			g.setColor(new Color(196, 207, 207, 115));
@@ -190,12 +202,10 @@ public class Window extends JPanel
 		// start the algorithm
 		if(key == KeyEvent.VK_SPACE) {
 			if(isRun) {
-				menu.getRun().setText("Stop");
 				isRun = false;
 				begin();
 			}
 			else {
-				menu.getRun().setText("Run");
 				isRun = true;
 			}
 			repaint();
@@ -346,18 +356,12 @@ public class Window extends JPanel
 				startNode = null;
 				endNode = null;
 				walls = new ArrayList<>();
-				a.setup();
+				a.reset();
 			}
 			
 			if(command.equals("Run")) {
-				menu.getRun().setText("Stop");
 				isRun = false;
 				begin();
-			}
-			if(command.equals("Stop")){
-				menu.getRun().setText("Run");
-				isRun = true;
-					
 			}
 		}
 		repaint();
