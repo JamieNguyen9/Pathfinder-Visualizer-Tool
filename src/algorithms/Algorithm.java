@@ -15,10 +15,13 @@ public abstract class Algorithm {
 	Window w;
 	int size;
 	ArrayList<Node> path;
+	ArrayList<Node> walls;
 	PriorityQueue<Node> frontier;
+	HashMap<Node, Node> parent;
 	HashSet<Node> explored;	
 	boolean isFound;
 	boolean fail;
+	boolean setRun;
 	
 	public Algorithm(Window w, int size) {
 		this.w = w;
@@ -30,12 +33,17 @@ public abstract class Algorithm {
 		path = new ArrayList<>();
 		isFound = false;
 		fail = false;
+		setRun = false;
 	}
 	
 	public Algorithm(int size) {
 		this.size = size;
 		startNode = null;
 		endNode = null;
+	}
+	
+	public boolean isRunning() {
+		return setRun;
 	}
 	
 	public void addWindow(Window w) {
@@ -46,7 +54,11 @@ public abstract class Algorithm {
 		return name;
 	}
 	
-	public void start(Node s, Node e, ArrayList<Node> walls) {
+	public void setup(Node s, Node e, ArrayList<Node> walls) {
+		
+	}
+	
+	public void start() {
 		
 	}
 	

@@ -45,6 +45,7 @@ public class Window extends JPanel
 	private Algorithm a;
 	private ArrayList<Node> walls;
 	private boolean showSteps;
+	private Timer timer = new Timer(5, this);
 	
 	// Constructor
 	public Window(String title) {
@@ -97,21 +98,6 @@ public class Window extends JPanel
 		int width = this.getWidth();
 		
 		if(a.isFound()) {
-			// draw explored
-			for(int i = 0; i < a.getExplored().size(); i++) {
-				int[] tempCoords = a.getExplored().get(i).getCoord();
-				
-				g.setColor(Color.pink);
-				g.fillRect(tempCoords[0], tempCoords[1], size, size);
-			}
-			
-			// draw frontier
-			for(int i = 0; i < a.getFrontier().size(); i++) {
-				int[] tempCoords = a.getFrontier().get(i).getCoord();
-				
-				g.setColor(Color.cyan);
-				g.fillRect(tempCoords[0], tempCoords[1], size, size);
-			}
 			
 			// draw solution path
 			for(int i = 0; i < a.getPath().size(); i++) {
@@ -126,16 +112,25 @@ public class Window extends JPanel
 		}
 		
 		if(a.isFail()) {
-			// draw explored
-			for(int i = 0; i < a.getExplored().size(); i++) {
-				int[] tempCoords = a.getExplored().get(i).getCoord();
-				
-				g.setColor(Color.green.brighter());
-				g.fillRect(tempCoords[0], tempCoords[1], size, size);
-			}
 			
 			menu.getRun().setText("Run");
 			isRun = true;
+		}
+		
+		// draw explored
+		for(int i = 0; i < a.getExplored().size(); i++) {
+			int[] tempCoords = a.getExplored().get(i).getCoord();
+			
+			g.setColor(Color.pink);
+			g.fillRect(tempCoords[0], tempCoords[1], size, size);
+		}
+		
+		// draw frontier
+		for(int i = 0; i < a.getFrontier().size(); i++) {
+			int[] tempCoords = a.getFrontier().get(i).getCoord();
+			
+			g.setColor(Color.cyan);
+			g.fillRect(tempCoords[0], tempCoords[1], size, size);
 		}
 		
 		// draw startNode 
@@ -336,7 +331,14 @@ public class Window extends JPanel
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-			
+		if(a.isRunning() && !a.getFrontier().isEmpty() && !a.isFound()) {
+			a.start();
+		}
+		else {
+			timer.stop();
+		}
+		
+		
 		Object source = e.getSource();
 		if (source instanceof JComboBox) {
 			JComboBox<String> cb = (JComboBox)e.getSource();
@@ -364,17 +366,30 @@ public class Window extends JPanel
 				begin();
 			}
 		}
-		repaint();
+		System.out.println("repainting attempt");
+		
+		this.revalidate();
+		this.repaint();
 	}
 	
 	// Begins path finding algorithm
 	public void begin() {
 		if(startNode != null && endNode != null) {
 			if(showSteps) {
-				// set up and add time
+				a.setup(startNode, endNode, walls);
+				timer.start();
+				System.out.println("timer here");
 			}
 			else {
-				a.start(startNode, endNode, walls);
+				a.setup(startNode, endNode, walls);
+				System.out.println("none here");
+				while(!a.getFrontier().isEmpty() && !a.isFound()) {
+					a.start();
+				}
+				
+				if(!a.isFound()) {
+					System.out.println("No solution");
+				}
 			}
 		}
 		else {
