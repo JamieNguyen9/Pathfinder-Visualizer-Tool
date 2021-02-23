@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -23,11 +22,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.Timer;	
 
 @SuppressWarnings("serial")
 public class Window extends JPanel
@@ -45,7 +41,7 @@ public class Window extends JPanel
 	private Algorithm a;
 	private ArrayList<Node> walls;
 	private boolean showSteps;
-	private Timer timer = new Timer(5, this);
+	private Timer timer = new Timer(500, this);
 	
 	// Constructor
 	public Window(String title) {
@@ -57,8 +53,7 @@ public class Window extends JPanel
 		isRun = true;
 		menu = new MenuControl(this);
 		hover = false;
-		this.a = new AStar(null, size);
-		a.addWindow(this);
+		this.a = new AStar(this, size);
 		walls = new ArrayList<>();		
 		showSteps = menu.getCheckbox().isSelected();
 		
@@ -97,8 +92,26 @@ public class Window extends JPanel
 		int height = this.getHeight();
 		int width = this.getWidth();
 		
+		if(a.isFail()) {
+			menu.getRun().setText("Run");
+			isRun = true;
+		}
+		
+		// draw explored
+		for(int i = 0; i < a.getExplored().size(); i++) {
+			int[] tempCoords = a.getExplored().get(i).getCoord();
+			g.setColor(Color.pink);
+			g.fillRect(tempCoords[0], tempCoords[1], size, size);
+		}
+		
+		// draw frontier
+		for(int i = 0; i < a.getFrontier().size(); i++) {
+			int[] tempCoords = a.getFrontier().get(i).getCoord();
+			g.setColor(Color.cyan);
+			g.fillRect(tempCoords[0], tempCoords[1], size, size);
+		}
+		
 		if(a.isFound()) {
-			
 			// draw solution path
 			for(int i = 0; i < a.getPath().size(); i++) {
 				int[] tempCoords = a.getPath().get(i).getCoord();
@@ -111,33 +124,12 @@ public class Window extends JPanel
 			isRun = true;
 		}
 		
-		if(a.isFail()) {
-			
-			menu.getRun().setText("Run");
-			isRun = true;
-		}
-		
-		// draw explored
-		for(int i = 0; i < a.getExplored().size(); i++) {
-			int[] tempCoords = a.getExplored().get(i).getCoord();
-			
-			g.setColor(Color.pink);
-			g.fillRect(tempCoords[0], tempCoords[1], size, size);
-		}
-		
-		// draw frontier
-		for(int i = 0; i < a.getFrontier().size(); i++) {
-			int[] tempCoords = a.getFrontier().get(i).getCoord();
-			
-			g.setColor(Color.cyan);
-			g.fillRect(tempCoords[0], tempCoords[1], size, size);
-		}
-		
 		// draw startNode 
 		if(startNode != null) {
 			g.setColor(Color.red.brighter());
 			g.fillRect(startNode.getCoord()[0], startNode.getCoord()[1], size, size);
 		}
+		
 		
 		// draw endNode 
 		if(endNode != null) {
@@ -172,13 +164,13 @@ public class Window extends JPanel
 		menu.setPos();
 		
 		// update speed Text based on checkbox
-		if(menu.getCheckbox().isSelected()) {
+		if(!menu.getCheckbox().isSelected()) {
 			menu.getSpeedNum().setText("N/A");
-			showSteps = true;
+			showSteps = false;
 		}
 		else {
 			menu.getSpeedNum().setText(Integer.toString(menu.getSlider().getValue()));
-			showSteps = false;
+			showSteps = true;
 		}
 		
 		
@@ -193,6 +185,30 @@ public class Window extends JPanel
 			window.dispose();
 			System.exit(0);
 		}
+		
+		if(key == 'q') {
+			int x = (int)this.getMousePosition().getX();
+			int y = (int)this.getMousePosition().getY();
+			if(startNode == null) {
+				startNode = new Node(x - (x % size), y - (y % size));
+			}
+			else {
+				startNode.setCoord(x - (x % size), y - (y % size));
+			}
+			repaint();
+		}
+		if(key == 'w') {
+			int x = (int)this.getMousePosition().getX();
+			int y = (int)this.getMousePosition().getY();
+			if(endNode == null) {
+				endNode = new Node(x - (x % size), y - (y % size));
+			}
+			else {
+				endNode.setCoord(x - (x % size), y - (y % size));
+			}
+			repaint();
+		}
+		
 		
 		// start the algorithm
 		if(key == KeyEvent.VK_SPACE) {
@@ -218,54 +234,26 @@ public class Window extends JPanel
 			int xLeftover = e.getX() % size;
 			int yLeftover = e.getY() % size;
 			
-			// startNode
-			if(key == 'q') {
-				if(startNode == null) { // if it does not exist
-					startNode = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
-				}
-				else { // if it already exists set it to a different block
-					startNode.setCoord(e.getX() - xLeftover, e.getY() - yLeftover);
-				}
-				
-				// put it on to the screen
-				this.repaint();
-			}
-			
-			// endNode
-			else if(key ==  'w') {
-				if(endNode == null) {
-					endNode = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
-				}
-				else {
-					endNode.setCoord(e.getX() - xLeftover, e.getY() - yLeftover);
-				}
-				
-				this.repaint();
-			}
-			
 			// wall
-			else {
-				int[] coords = {e.getX() - xLeftover, e.getY() - yLeftover};
-				
-				if((startNode == null || !Arrays.equals(coords, startNode.getCoord())) && 
-						(endNode == null || !Arrays.equals(coords, endNode.getCoord()))) {
-					wall = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
+			int[] coords = {e.getX() - xLeftover, e.getY() - yLeftover};
+			
+			if((startNode == null || !Arrays.equals(coords, startNode.getCoord())) && 
+					(endNode == null || !Arrays.equals(coords, endNode.getCoord()))) {
+				wall = new Node(e.getX() - xLeftover, e.getY() - yLeftover);
 
-					boolean temp = false;
-					for(Node n : walls) {
-						if(n.equals(wall)) {
-							temp = true;
-							break;
-						}
-					}
-					
-					if(!temp) {
-						walls.add(wall);
-						repaint();
+				boolean temp = false;
+				for(Node n : walls) {
+					if(n.equals(wall)) {
+						temp = true;
+						break;
 					}
 				}
+				
+				if(!temp) {
+					walls.add(wall);
+					repaint();
+				}
 			}
-			
 		}
 		// right click ( remove from board )
 		if(SwingUtilities.isRightMouseButton(e)) {
@@ -329,6 +317,7 @@ public class Window extends JPanel
 		repaint();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(a.isRunning() && !a.getFrontier().isEmpty() && !a.isFound()) {
@@ -341,7 +330,7 @@ public class Window extends JPanel
 		
 		Object source = e.getSource();
 		if (source instanceof JComboBox) {
-			JComboBox<String> cb = (JComboBox)e.getSource();
+			JComboBox<String> cb = (JComboBox<String>)e.getSource();
 			String algo = (String)cb.getSelectedItem();
 			if(algo.equals("A* Search")) {
 				a = new AStar(this, size);
@@ -378,7 +367,6 @@ public class Window extends JPanel
 			if(showSteps) {
 				a.setup(startNode, endNode, walls);
 				timer.start();
-				System.out.println("timer here");
 			}
 			else {
 				a.setup(startNode, endNode, walls);
@@ -414,7 +402,6 @@ public class Window extends JPanel
 
 	public static void main(String[] args) { 
 		new Window("Pathfinding Visualizer (Algorithm: A* Search)");
-		
 	}
 
 }

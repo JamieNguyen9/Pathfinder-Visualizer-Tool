@@ -14,11 +14,6 @@ public class AStar extends Algorithm {
 		name = "AStar";
 	}
 	
-	public AStar(int size) {
-		super(size);
-		name = "AStar";
-		
-	}
 	
 	public void setup(Node s, Node e, ArrayList<Node> walls) {
 		startNode = s;
@@ -31,8 +26,7 @@ public class AStar extends Algorithm {
 		setRun = true;
 	}
 	
-	// one step
-	
+	// performs one step
 	public void start() {
 		
 		Node currState = frontier.poll();
@@ -48,7 +42,8 @@ public class AStar extends Algorithm {
 		for(Node n: getNeighbors(currState)) {
 			int h = manhattanCost(n);
 				
-			// check in walls and explored
+			
+			// check in walls and explored - if it exists continue
 			boolean contains = false;
 			for(Node e1 : walls) {
 				if(e1.equals(n)) {
@@ -60,11 +55,11 @@ public class AStar extends Algorithm {
 					contains = true;
 				}
 			}
-			
 			if(contains) {
 				continue;
 			}
-						
+			
+			
 			// check if n is in frontier
 			boolean inFrontier = false;
 			ArrayList<Node> t_front = new ArrayList<>(frontier);
@@ -74,6 +69,7 @@ public class AStar extends Algorithm {
 					break;
 				}
 			}
+			
 			
 			// if it is not in frontier set value and add to frontier
 			if(!inFrontier) {

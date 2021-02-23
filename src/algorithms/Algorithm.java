@@ -36,19 +36,11 @@ public abstract class Algorithm {
 		setRun = false;
 	}
 	
-	public Algorithm(int size) {
-		this.size = size;
-		startNode = null;
-		endNode = null;
-	}
 	
 	public boolean isRunning() {
 		return setRun;
 	}
 	
-	public void addWindow(Window w) {
-		this.w = w;
-	}
 	
 	public String getName() {
 		return name;
@@ -78,6 +70,7 @@ public abstract class Algorithm {
 		return isFound;
 	}
 	
+	// clears the board
 	public void reset() {
 		startNode = null;
 		endNode = null;
@@ -86,12 +79,14 @@ public abstract class Algorithm {
 		path = new ArrayList<>();
 		isFound = false;
 		fail = false;
+		setRun = false;
 	}
 	
 	public boolean isFail() {
 		return fail;
 	}
 	
+	// calculates the manhattan distance (not diagonally)
 	public int manhattanCost(Node n) {
 		int[] endCoords = endNode.getCoord();
 		int[] currCoords = n.getCoord();
@@ -100,6 +95,7 @@ public abstract class Algorithm {
 		return dist;
 	}
 	
+	// returns the path from the node to the root
 	public ArrayList<Node> backtrack(Node n, Node e, HashMap<Node, Node> parent) {
 		ArrayList<Node> res = new ArrayList<>();
 		res.add(e);
@@ -110,6 +106,8 @@ public abstract class Algorithm {
 		return res;
 	}
 	
+	
+	// retrieves the neighbors of that node
 	public ArrayList<Node> getNeighbors(Node n) {
 		ArrayList<Node> res = new ArrayList<>();
 		int[] coords = n.getCoord();
